@@ -28,3 +28,6 @@ htmlcov/
 .coverage.*
 coverage.xml
 *.cover 
+
+.vscode/
+.vscode/settings.json
