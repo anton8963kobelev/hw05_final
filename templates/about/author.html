@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block image %}{% endblock %}
+{% block content %}
+{% load user_filters %}
+  <main role="main" class="container">
+    <div class="row">
+      <div class="col-md-3 mb-3 mt-1">
+        <div class="card">
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+                <div class="h3">
+                  Кобелев Антон
+                </div> 
+              </li>
+              <li class="list-group-item">
+                <div class="h6 text-muted">
+                  Студент "Яндекс.Практикум" |<br>
+                  Инженер-схемотехник |<br>
+                  Муж, папа
+                </div>
+              </li>
+            </ul>                                               
+          </div>                    
+        </div>                
+      </div>
+      <p>
+      <a href="https://github.com/anton8963kobelev">Аккаунт в Github</a><br> 
+      <a href="https://vk.com/id143325843">Профиль Вконтакте</a><br>
+      <a href="https://app.slack.com/client/TPV9DP0N4/G01FQHGP21X/thread/G01FC0WAF45-1612383265.112900">Профиль в Слак</a><br><br>
+      <a href="https://samara.hh.ru/resume/c17737bcff07a64d940039ed1f416e556b5668">Резюме на HeadHunter</a>
+      </p>
+      <div class="col-md-9">
+        <div class="card-body">                    
+          <div class="card-text">
+            <p>Закончил Самарский университет по специальности "Электроника. Наноэлектроника".<br>
+               Работаю в отделе по разработке ультразвукового расходомера жидкости 
+               инженером-схемотехником.<br>
+               Пока до конца не понимаю, нравится ли мне то, чем я занимаюсь.  
+               Поэтому решил попробовать обучиться программированию.
+               Даже если в области написания сайтов ничего не выйдет, то знания, полученные
+               в Яндекс.Практикум не пройдут даром - продолжу программировать, 
+               но только микроконтроллеры на языке С++, что очень необходимо в моей специальности.<br>
+               <br>
+               Если говорить обо мне, как о человеке:<br>
+               - Ответсвенный;<br>- Немного альтрустичный;<br>
+               - Трудолюбивый;<br>
+               - С чувством юмора (по крайней мере так говорит мама); <br>
+               - Люблю порядок, но только не на рабочем столе (фото прилагается).<br>
+               <br>
+               {% load static %}
+               <img src="{% static 'about/images/Screenshot_1000.png' %}" alt="Screenshot">
+               </p>
+          </div>                    
+        </div>                
+      </div>            
+    </div>        
+  </main>
+{% endblock %}
