@@ -74,6 +74,27 @@ class PostsURLTests(TestCase):
                                         'username': self.post.author,
                                         'post_id': self.post.id})))
 
+    def test_profile_follow_url_redirect_anonymous_on_admin_login(self):
+        """Страница по адресу /<username>/follow/ перенаправит
+        анонимного пользователя на страницу логина."""
+        response = (self.guest_client.get(
+                    f'/{self.post.author}/follow/',
+                    follow=True))
+        (self.assertRedirects(response, reverse('login') + '?next='
+                              + reverse('profile_follow', kwargs={
+                                        'username': self.post.author})))
+
+    def test_comment_url_redirect_anonymous_on_admin_login(self):
+        """Страница по адресу /<username>/<post_id>/comment/
+        перенаправит анонимного пользователя на страницу логина."""
+        response = (self.guest_client.get(
+                    f'/{self.post.author}/{self.post.id}/comment/',
+                    follow=True))
+        (self.assertRedirects(response, reverse('login') + '?next='
+                              + reverse('add_comment', kwargs={
+                                        'username': self.post.author,
+                                        'post_id': self.post.id})))
+
     def test_post_edit_url_redirect_non_author_of_the_post(self):
         """Страница по адресу /<username>/<post_id>/edit/
         перенаправит не автора поста на страницу просмотра поста."""

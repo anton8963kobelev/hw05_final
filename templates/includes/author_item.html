@@ -10,9 +10,9 @@
             </div>
             <ul class="list-group list-group-flush">
                         {% if user.is_authenticated %}  
-                        <li class="list-group-item">
+                            <li class="list-group-item">
                             <div class="h6 text-muted">
-                            Подписчиков: {{ author.following.count }} <br />
+                            Подписчиков: {{ author.following.count }} <br/>
                             Подписан: {{ author.follower.count }}
                             </div>
                         </li>

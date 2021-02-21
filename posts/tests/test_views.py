@@ -52,6 +52,9 @@ class PostsPagesTests(TestCase):
             image=cls.uploaded,
         )
 
+        cls.user_2 = User.objects.create(username='Тестовый автор_2')
+        cls.user_3 = User.objects.create(username='Тестовый автор_3')
+
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
@@ -213,8 +216,43 @@ class PostsPagesTests(TestCase):
         (self.assertNotEqual(response_before_post.content,
                              response_after_clear.content))
 
-    def test_authorized_client_can_follow_other_users(self):
-        pass
+    def test_authorized_client_can_follow_unfollow_other_users(self):
+        """Авторизованный пользователь может подписыватся/отписываться
+        на/от других пользователей"""
+        self.assertEqual(self.user_2.following.count(), 0)
+        self.assertEqual(self.post.author.follower.count(), 0)
+        (self.authorized_client.get(reverse('profile_follow',
+                                    kwargs={'username': self.user_2})))
+        self.assertEqual(self.user_2.following.count(), 1)
+        self.assertEqual(self.post.author.follower.count(), 1)
+        (self.authorized_client.get(reverse('profile_unfollow',
+                                    kwargs={'username': self.user_2})))
+        self.assertEqual(self.user_2.following.count(), 0)
+        self.assertEqual(self.post.author.follower.count(), 0)
+
+    def test_new_post_appears_on_followindex_at_the_subscriber(self):
+        """Новая запись пользователя появляется в ленте у подписчика
+        и не появляется в ленте у не подписанного пользователя"""
+        self.assertEqual(self.user_2.following.count(), 0)
+        self.assertEqual(self.post.author.follower.count(), 0)
+        (self.authorized_client.get(reverse('profile_follow',
+                                    kwargs={'username': self.user_2})))
+        self.assertEqual(self.user_2.following.count(), 1)
+        self.assertEqual(self.post.author.follower.count(), 1)
+        post_user_2 = Post.objects.create(
+            text='Тестовый текст_2',
+            author=self.user_2,
+        )
+        post_user_3 = Post.objects.create(
+            text='Тестовый текст_3',
+            author=self.user_3,
+        )
+        response = self.authorized_client.get(reverse('follow_index'))
+        (self.assertEqual(len(response.context['page']),
+                          post_user_2.author.posts.count()))
+        post_text_0 = response.context.get('page')[0].text
+        self.assertIn(post_user_2.text, post_text_0)
+        self.assertNotIn(post_user_3.text, post_text_0)
 
 
 class PaginatorViewsTest(TestCase):
