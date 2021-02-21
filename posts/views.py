@@ -78,12 +78,14 @@ def post_view(request, username, post_id):
     post_list = author.posts.all()
     comments = post.comments.all()
     form = CommentForm()
+    add_comment = True
     context = {
         'author': author,
         'post': post,
         'post_list': post_list,
         'comments': comments,
         'form': form,
+        'add_comment': add_comment,
     }
     return render(request, 'post.html', context=context)
 
