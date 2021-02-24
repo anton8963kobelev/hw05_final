@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.models import Group, Post, User
+from posts.models import Follow, Group, Post, User
 
 settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -229,8 +229,12 @@ class PostsPagesTests(TestCase):
     def test_authorized_client_can_unfollow_other_users(self):
         """Авторизованный пользователь может отписываться от
         других пользователей"""
-        (self.authorized_client.get(reverse('profile_follow',
-                                    kwargs={'username': self.user_2})))
+        Follow.objects.create(
+            user=self.post.author,
+            author=self.user_2,
+        )
+        self.assertEqual(self.user_2.following.count(), 1)
+        self.assertEqual(self.post.author.follower.count(), 1)
         (self.authorized_client.get(reverse('profile_unfollow',
                                     kwargs={'username': self.user_2})))
         self.assertEqual(self.user_2.following.count(), 0)
