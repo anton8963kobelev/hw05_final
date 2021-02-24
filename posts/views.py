@@ -53,21 +53,19 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     user = request.user
-    if user.is_authenticated:
-        following = Follow.objects.filter(user=user, author=author)
-        context = {
-            'author': author,
-            'page': page,
-            'post_list': post_list,
-            'paginator': paginator,
-            'following': following,
-        }
-        return render(request, 'profile.html', context=context)
+    following = False
+    buttons = False
+    if user.is_authenticated and user != author:
+        buttons = True
+        if Follow.objects.filter(user=user, author=author).exists():
+            following = True
     context = {
         'author': author,
         'page': page,
         'post_list': post_list,
         'paginator': paginator,
+        'following': following,
+        'buttons': buttons
     }
     return render(request, 'profile.html', context=context)
 
@@ -153,9 +151,7 @@ def profile_follow(request, username):
     user = request.user
     author = get_object_or_404(User, username=username)
     if user != author:
-        following, created = Follow.objects.get_or_create(
-            user=user, author=author
-        )
+        Follow.objects.get_or_create(user=user, author=author)
     return redirect('profile', username)
 
 
@@ -163,6 +159,5 @@ def profile_follow(request, username):
 def profile_unfollow(request, username):
     user = request.user
     author = get_object_or_404(User, username=username)
-    if user != author:
-        Follow.objects.filter(user=user, author=author).delete()
+    Follow.objects.filter(user=user, author=author).delete()
     return redirect('profile', username)

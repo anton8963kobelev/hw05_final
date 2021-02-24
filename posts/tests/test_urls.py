@@ -45,9 +45,15 @@ class PostsURLTests(TestCase):
                 self.assertEqual(response.status_code, 200)
 
     def test_new_post_url_exists_at_desired_location(self):
-        """Страница /new/ доступна авторизованному пользователю."""
-        response = self.authorized_client.get('/new/')
-        self.assertEqual(response.status_code, 200)
+        """Страница доступна авторизованному пользователю."""
+        url_slugs = [
+            '/new/',
+            '/follow/',
+        ]
+        for slug in url_slugs:
+            with self.subTest():
+                response = self.authorized_client.get(slug)
+                self.assertEqual(response.status_code, 200)
 
     def test_new_post_url_redirect_anonymous_on_admin_login(self):
         """Страница по адресу /new/ перенаправит анонимного
@@ -74,27 +80,6 @@ class PostsURLTests(TestCase):
                                         'username': self.post.author,
                                         'post_id': self.post.id})))
 
-    def test_profile_follow_url_redirect_anonymous_on_admin_login(self):
-        """Страница по адресу /<username>/follow/ перенаправит
-        анонимного пользователя на страницу логина."""
-        response = (self.guest_client.get(
-                    f'/{self.post.author}/follow/',
-                    follow=True))
-        (self.assertRedirects(response, reverse('login') + '?next='
-                              + reverse('profile_follow', kwargs={
-                                        'username': self.post.author})))
-
-    def test_comment_url_redirect_anonymous_on_admin_login(self):
-        """Страница по адресу /<username>/<post_id>/comment/
-        перенаправит анонимного пользователя на страницу логина."""
-        response = (self.guest_client.get(
-                    f'/{self.post.author}/{self.post.id}/comment/',
-                    follow=True))
-        (self.assertRedirects(response, reverse('login') + '?next='
-                              + reverse('add_comment', kwargs={
-                                        'username': self.post.author,
-                                        'post_id': self.post.id})))
-
     def test_post_edit_url_redirect_non_author_of_the_post(self):
         """Страница по адресу /<username>/<post_id>/edit/
         перенаправит не автора поста на страницу просмотра поста."""
@@ -113,6 +98,7 @@ class PostsURLTests(TestCase):
             'new.html': '/new/',
             'profile.html': f'/{self.post.author}/',
             'post.html': f'/{self.post.author}/{self.post.id}/',
+            'follow.html': '/follow/',
         }
         for template, reverse_name in templates_url_names.items():
             with self.subTest():
@@ -129,3 +115,64 @@ class PostsURLTests(TestCase):
         """Сервет возвращает код 404, если страница не найдена"""
         response = self.authorized_client.get('/group/')
         self.assertEqual(response.status_code, 404)
+
+    def test_comment_url_redirect_anonymous_on_admin_login(self):
+        """Страница по адресу /<username>/<post_id>/comment/
+        перенаправит анонимного пользователя на страницу логина."""
+        response = (self.guest_client.get(
+                    f'/{self.post.author}/{self.post.id}/comment/',
+                    follow=True))
+        (self.assertRedirects(response, reverse('login') + '?next='
+                              + reverse('add_comment', kwargs={
+                                        'username': self.post.author,
+                                        'post_id': self.post.id})))
+
+    def test_add_comment_url_redirect__on_post_view(self):
+        """Страница по адресу /<username>/<post_id>/comment/ перенаправит
+        авторизованного пользователя на страницу просмотра поста."""
+        response = (self.authorized_client.get(
+                    f'/{self.post.author}/{self.post.id}/comment/',
+                    follow=True))
+        self.assertRedirects(response, reverse('post', kwargs={
+                                               'username': self.post.author,
+                                               'post_id': self.post.id}))
+
+    def test_follow_index_url_redirect_anonymous_on_admin_login(self):
+        """Страница по адресу /follow/ перенаправит
+        анонимного пользователя на страницу логина."""
+        response = self.guest_client.get('/follow/', follow=True)
+        (self.assertRedirects(response, reverse('login') + '?next='
+                              + reverse('follow_index')))
+
+    def test_profile_follow_url_redirect_anonymous_on_admin_login(self):
+        """Страница по адресу /<username>/follow/ перенаправит
+        анонимного пользователя на страницу логина."""
+        response = (self.guest_client.get(
+                    f'/{self.post.author}/follow/',
+                    follow=True))
+        (self.assertRedirects(response, reverse('login') + '?next='
+                              + reverse('profile_follow', kwargs={
+                                        'username': self.post.author})))
+
+    def test_profile_unfollow_url_redirect_anonymous_on_admin_login(self):
+        """Страница по адресу /<username>/unfollow/ перенаправит
+        анонимного пользователя на страницу логина."""
+        response = (self.guest_client.get(
+                    f'/{self.post.author}/unfollow/',
+                    follow=True))
+        (self.assertRedirects(response, reverse('login') + '?next='
+                              + reverse('profile_unfollow', kwargs={
+                                        'username': self.post.author})))
+
+    def test_following_urls_redirect_on_profile_page(self):
+        """Подписка/отписка перенаправит авторизованного пользователя
+        на страницу просмотра профиля автора."""
+        url_slugs = [
+            f'/{self.post_2.author}/follow/',
+            f'/{self.post_2.author}/unfollow/',
+        ]
+        for slug in url_slugs:
+            with self.subTest():
+                response = self.authorized_client.get((slug), follow=True)
+                (self.assertRedirects(response, reverse('profile', kwargs={
+                                      'username': self.post_2.author})))
