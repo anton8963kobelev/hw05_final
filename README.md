@@ -21,7 +21,7 @@ git clone https://github.com/anton8963kobelev/hw05_final.git
 cd hw05_final
 ``` 
 
-Создайте и активируйте вирутальное окружение:
+Создайте и активируйте виртуальное окружение:
 
 ``` 
 python -m venv venv
